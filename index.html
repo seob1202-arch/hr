@@ -28,6 +28,11 @@
     .input-field { width: 100%; border-radius: 0.75rem; border: 1px solid #E2E8F0; background-color: #fff; padding: 0.75rem 1rem; font-size: 0.95rem; color: #0F172A; transition: all 0.2s; }
     .input-field:focus { border-color: #2563EB; outline: none; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
     .aspect-card { aspect-ratio: 16/10; }
+    
+    /* Toast Animation */
+    #toast-notification { transition: transform 0.3s ease-out, opacity 0.3s ease-out; }
+    .toast-hidden { transform: translate(-50%, -20px); opacity: 0; pointer-events: none; }
+    .toast-visible { transform: translate(-50%, 20px); opacity: 1; }
   </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col">
@@ -36,6 +41,11 @@
     // ★★★ [중요] 배포된 GAS 웹 앱 URL을 여기에 입력하세요 ★★★
     const API_URL = "https://script.google.com/macros/s/AKfycbyKz0uQvBPhecQNDUYDrkadQwS4GBVOWvYNbYm1QBJsXYseoekMYXP1AdsU0lKTmWuv/exec"; 
   </script>
+
+  <div id="toast-notification" class="fixed top-0 left-1/2 z-[100] flex items-center gap-3 bg-slate-800 text-white px-6 py-3.5 rounded-full shadow-2xl toast-hidden">
+    <i id="toast-icon" class="fa-solid fa-circle-check text-green-400 text-lg"></i>
+    <span id="toast-message" class="font-bold text-sm tracking-wide"></span>
+  </div>
 
   <nav class="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-slate-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -249,8 +259,7 @@
           <button onclick="closeModal('detail-modal')" class="absolute top-4 right-4 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-md transition-all"><i class="fa-solid fa-xmark"></i></button>
           
           <div class="relative group bg-slate-100">
-             <div id="modal-images" class="w-full h-72 flex overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth">
-                </div>
+             <div id="modal-images" class="w-full h-72 flex overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth"></div>
              
              <button id="slider-prev" class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-slate-800 w-8 h-8 flex items-center justify-center rounded-full shadow-md z-10 hidden transition-opacity" onclick="scrollSlider(-1)">
                 <i class="fa-solid fa-chevron-left"></i>
@@ -374,6 +383,29 @@
       return url;
     }
 
+    // --- Custom Toast Function (Replace Alert) ---
+    function showToast(message, isSuccess = true) {
+      const toast = document.getElementById('toast-notification');
+      const icon = document.getElementById('toast-icon');
+      const msg = document.getElementById('toast-message');
+
+      msg.innerText = message;
+      
+      if(isSuccess) {
+        icon.className = "fa-solid fa-circle-check text-green-400 text-lg";
+      } else {
+        icon.className = "fa-solid fa-circle-exclamation text-red-400 text-lg";
+      }
+
+      toast.classList.remove('toast-hidden');
+      toast.classList.add('toast-visible');
+
+      setTimeout(() => {
+        toast.classList.remove('toast-visible');
+        toast.classList.add('toast-hidden');
+      }, 3000);
+    }
+
     function initCountryOptions() {
         const selectWrite = document.getElementById('inputCountry');
         const selectFilter = document.getElementById('filter-country');
@@ -423,7 +455,7 @@
     function handleAddContact() {
         const type = document.getElementById('tempContactType').value;
         const value = document.getElementById('tempContactValue').value.trim();
-        if (!value) { alert("연락처를 입력해주세요."); return; }
+        if (!value) { showToast("연락처를 입력해주세요.", false); return; }
         contactList.push({ type, value });
         renderContactList();
         document.getElementById('tempContactValue').value = '';
@@ -459,7 +491,7 @@
     function shareApp() {
         const shareData = { title: 'K-Freelance', text: '글로벌 한인 재능 마켓 K-Freelance를 확인해보세요!', url: window.location.href };
         if (navigator.share) { navigator.share(shareData).catch((err) => console.log('공유 취소됨', err)); } 
-        else { navigator.clipboard.writeText(window.location.href).then(() => alert('페이지 주소가 복사되었습니다.')); }
+        else { navigator.clipboard.writeText(window.location.href).then(() => showToast('페이지 주소가 복사되었습니다.')); }
     }
 
     function showPage(pageId) {
@@ -497,12 +529,12 @@
           allData = json.data;
           renderCards(allData);
         } else {
-          alert('데이터 로드 실패: ' + json.message);
+          showToast('데이터 로드 실패: ' + json.message, false);
         }
       } catch (err) {
         loading.classList.add('hidden');
         console.error(err);
-        alert("서버 연결 실패. URL을 확인하세요.");
+        showToast("서버 연결 실패. URL을 확인하세요.", false);
       }
     }
 
@@ -599,7 +631,6 @@
         prevBtn.classList.add('hidden');
         nextBtn.classList.add('hidden');
       } else {
-        // Show arrows only if multiple images
         if(images.length > 1) {
             prevBtn.classList.remove('hidden');
             nextBtn.classList.remove('hidden');
@@ -612,11 +643,9 @@
           const img = document.createElement('img');
           img.src = convertDriveLink(src);
           img.onerror = function() { this.src='https://via.placeholder.com/600x400?text=Image+Load+Error'; };
-          // [수정] flex-shrink-0 추가로 이미지 가로 배치 정상화
           img.className = "w-full h-full flex-shrink-0 object-contain snap-center bg-black/5";
           imgContainer.appendChild(img);
 
-          // Dots creation
           if(images.length > 1) {
               const dot = document.createElement('div');
               dot.className = `w-2 h-2 rounded-full ${idx===0 ? 'bg-white' : 'bg-white/50'} shadow-sm`;
@@ -625,13 +654,9 @@
         });
       }
 
-      // --- Slider Scroll Handling ---
       window.scrollSlider = function(direction) {
           const w = imgContainer.clientWidth;
           imgContainer.scrollBy({ left: direction * w, behavior: 'smooth' });
-          
-          // Update dots (simple implementation based on scroll)
-          // In a real robust implementation, use IntersectionObserver
       };
 
       const pfContainer = document.getElementById('detail-portfolio-container');
@@ -641,7 +666,6 @@
         pfBtn.href = item.PortfolioLink;
         pfBtn.target = "_blank";
         pfBtn.className = "block w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3.5 rounded-xl font-bold text-center shadow-md shadow-indigo-200 transition-all transform active:scale-95";
-        // [수정] 텍스트 변경
         pfBtn.innerHTML = `<i class="fa-solid fa-link mr-2"></i> 포트폴리오 확인하기`;
         pfContainer.appendChild(pfBtn);
       }
@@ -667,7 +691,7 @@
           if (contact.type === 'kakao') {
               btn.classList.add("bg-[#FEE500]", "hover:bg-[#FDD835]", "text-slate-900", "shadow-yellow-200");
               btn.innerHTML = `<i class="fa-solid fa-comment"></i> 카카오톡 ID 복사 (${contact.value})`;
-              btn.onclick = () => { navigator.clipboard.writeText(contact.value).then(() => alert('카카오톡 ID가 복사되었습니다.')); };
+              btn.onclick = () => { navigator.clipboard.writeText(contact.value).then(() => showToast('카카오톡 ID가 복사되었습니다.')); };
           } else if (contact.type === 'openchat') {
               btn.classList.add("bg-slate-800", "hover:bg-slate-900", "text-white");
               btn.innerHTML = `<i class="fa-solid fa-arrow-up-right-from-square"></i> 오픈채팅 입장`;
@@ -705,7 +729,7 @@
 
     async function executeDelete() {
       const pwd = document.getElementById('delete-password').value;
-      if(!pwd) { alert('비밀번호를 입력하세요'); return; }
+      if(!pwd) { showToast('비밀번호를 입력하세요', false); return; }
       const btn = document.querySelector('#password-modal button.bg-red-500');
       const originalText = btn.textContent;
       btn.textContent = '처리중...'; btn.disabled = true;
@@ -714,16 +738,16 @@
         const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
         const json = await res.json();
         btn.textContent = originalText; btn.disabled = false;
-        if(json.success) { alert("삭제되었습니다."); closeModal('password-modal'); closeModal('detail-modal'); fetchData(); } 
-        else { alert("삭제 실패: " + json.message); }
-      } catch (err) { alert("통신 오류: " + err); btn.textContent = originalText; btn.disabled = false; }
+        if(json.success) { showToast("삭제되었습니다."); closeModal('password-modal'); closeModal('detail-modal'); fetchData(); } 
+        else { showToast("삭제 실패: " + json.message, false); }
+      } catch (err) { showToast("통신 오류: " + err, false); btn.textContent = originalText; btn.disabled = false; }
     }
 
     function handleImagePreview(input) {
       const container = document.getElementById('preview-container');
       container.innerHTML = '';
       selectedImages = [];
-      if (input.files.length > 3) { alert('최대 3장까지만 업로드 가능합니다.'); input.value = ''; return; }
+      if (input.files.length > 3) { showToast('최대 3장까지만 업로드 가능합니다.', false); input.value = ''; return; }
       Array.from(input.files).forEach(file => {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -750,7 +774,7 @@
 
     async function handleFormSubmit(e) {
       e.preventDefault();
-      if (contactList.length === 0) { alert("최소 한 개의 연락처를 추가해주세요."); return; }
+      if (contactList.length === 0) { showToast("최소 한 개의 연락처를 추가해주세요.", false); return; }
       const btn = document.getElementById('submit-btn');
       const originalText = btn.textContent;
       btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 처리 중...';
@@ -784,9 +808,9 @@
         const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
         const json = await res.json();
         btn.disabled = false; btn.textContent = originalText;
-        if(json.success) { alert('성공적으로 등록되었습니다!'); showPage('list'); fetchData(); } 
-        else { alert('등록 실패: ' + json.message); }
-      } catch (err) { btn.disabled = false; btn.textContent = originalText; alert('서버 통신 오류: ' + err); }
+        if(json.success) { showToast('성공적으로 등록되었습니다!'); showPage('list'); fetchData(); } 
+        else { showToast('등록 실패: ' + json.message, false); }
+      } catch (err) { btn.disabled = false; btn.textContent = originalText; showToast('서버 통신 오류: ' + err, false); }
     }
 
     const subCategories = { '생활/정착': ['통번역', '이사/운송', '법률상담', '부동산', '중고거래'], '투어/가이드': ['공항픽업', '현지투어', '숙박알선', '스냅촬영'], '교육/레슨': ['어학', '악기', '입시/과외', '운동/PT'], '비즈니스': ['마케팅', '디자인', '개발', '세무회계'], '심부름': ['구매대행', '청소', '돌봄', '기타'] };
