@@ -34,7 +34,7 @@
 
   <script>
     // ★★★ [중요] 배포된 GAS 웹 앱 URL을 여기에 입력하세요 ★★★
-    const API_URL = "https://script.google.com/macros/s/AKfycbxEEoA5nGLSmjnY7eprWRQMqnh3pr-eD0lz5RYIXIPJuC8XMnCwfqMTt1BafwAwOtV9/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbxmcmmJFBJNzQIvM7thJfbdzVjBEGCG8AJnyFjyKr-xKtvd-hYE23PKDp5GGuriBoJ2/exec"; 
   </script>
 
   <nav class="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-slate-200">
@@ -162,13 +162,9 @@
             <div>
                <label class="block text-sm font-bold text-slate-700 mb-1.5">가격 <span class="text-red-500">*</span></label>
                <div class="flex items-center w-full border border-slate-200 rounded-xl overflow-hidden focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-primary transition-all">
-                   <div id="currency-prefix" class="bg-slate-100 text-slate-600 font-bold px-3 py-3 border-r border-slate-200 min-w-[3.5rem] text-center">
-                       $
-                   </div>
+                   <div id="currency-prefix" class="bg-slate-100 text-slate-600 font-bold px-3 py-3 border-r border-slate-200 min-w-[3.5rem] text-center">$</div>
                    <input type="number" id="inputPrice" class="flex-1 px-3 py-3 outline-none text-slate-800 placeholder-slate-300" placeholder="0" required>
-                   <div class="bg-white text-slate-400 text-sm pr-3 py-3 whitespace-nowrap">
-                       / 건,시간
-                   </div>
+                   <div class="bg-white text-slate-400 text-sm pr-3 py-3 whitespace-nowrap">/ 건,시간</div>
                </div>
             </div>
             <div>
@@ -280,8 +276,7 @@
               <p id="detail-content" class="whitespace-pre-wrap text-slate-600 leading-relaxed"></p>
             </div>
 
-            <div id="contact-buttons-container" class="space-y-3">
-                </div>
+            <div id="contact-buttons-container" class="space-y-3"></div>
 
             <div class="mt-6 pt-6 border-t border-slate-100 flex justify-between items-center text-sm text-slate-400">
               <span id="detail-date" class="text-xs"></span>
@@ -374,7 +369,6 @@
     function handleCountryChange() {
         const country = document.getElementById('inputCountry').value;
         const data = COUNTRY_DATA[country];
-        
         if (data) {
             document.getElementById('currency-prefix').innerText = data.symbol;
             updateTempContactPlaceholder();
@@ -404,15 +398,9 @@
     function handleAddContact() {
         const type = document.getElementById('tempContactType').value;
         const value = document.getElementById('tempContactValue').value.trim();
-        
-        if (!value) {
-            alert("연락처를 입력해주세요.");
-            return;
-        }
-        
+        if (!value) { alert("연락처를 입력해주세요."); return; }
         contactList.push({ type, value });
         renderContactList();
-        
         document.getElementById('tempContactValue').value = '';
         updateTempContactPlaceholder();
     }
@@ -425,56 +413,35 @@
     function renderContactList() {
         const container = document.getElementById('added-contacts-list');
         container.innerHTML = '';
-        
         if (contactList.length === 0) {
             container.innerHTML = '<p id="contact-placeholder" class="text-xs text-slate-400 py-1">추가된 연락처가 없습니다.</p>';
             return;
         }
-
         contactList.forEach((item, index) => {
             const badge = document.createElement('div');
             badge.className = "flex items-center gap-2 bg-slate-100 text-slate-700 px-3 py-1.5 rounded-full text-xs font-bold border border-slate-200";
-            
             let icon = '';
             let label = item.type;
             if(item.type === 'phone') { icon = '<i class="fa-solid fa-phone text-slate-400"></i>'; label = '전화'; }
             else if(item.type === 'kakao') { icon = '<i class="fa-solid fa-comment text-yellow-500"></i>'; label = '카톡'; }
             else { icon = '<i class="fa-solid fa-arrow-up-right-from-square text-blue-500"></i>'; label = '오픈챗'; }
 
-            badge.innerHTML = `
-                ${icon}
-                <span>${label}: ${item.value.length > 15 ? item.value.substring(0,12)+'...' : item.value}</span>
-                <button onclick="removeContact(${index})" class="ml-1 text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
-            `;
+            badge.innerHTML = `${icon}<span>${label}: ${item.value.length > 15 ? item.value.substring(0,12)+'...' : item.value}</span><button onclick="removeContact(${index})" class="ml-1 text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>`;
             container.appendChild(badge);
         });
     }
 
     function shareApp() {
-        const shareData = {
-            title: 'K-Freelance',
-            text: '글로벌 한인 재능 마켓 K-Freelance를 확인해보세요!',
-            url: window.location.href
-        };
-        if (navigator.share) {
-            navigator.share(shareData).catch((err) => console.log('공유 취소됨', err));
-        } else {
-            navigator.clipboard.writeText(window.location.href).then(() => alert('페이지 주소가 복사되었습니다.'));
-        }
+        const shareData = { title: 'K-Freelance', text: '글로벌 한인 재능 마켓 K-Freelance를 확인해보세요!', url: window.location.href };
+        if (navigator.share) { navigator.share(shareData).catch((err) => console.log('공유 취소됨', err)); } 
+        else { navigator.clipboard.writeText(window.location.href).then(() => alert('페이지 주소가 복사되었습니다.')); }
     }
 
     function showPage(pageId) {
       const listPage = document.getElementById('list-page');
       const writePage = document.getElementById('write-page');
-      if (pageId === 'list') {
-        writePage.classList.add('hidden');
-        listPage.classList.remove('hidden');
-        window.scrollTo(0, 0);
-      } else {
-        listPage.classList.add('hidden');
-        writePage.classList.remove('hidden');
-        window.scrollTo(0, 0);
-      }
+      if (pageId === 'list') { writePage.classList.add('hidden'); listPage.classList.remove('hidden'); window.scrollTo(0, 0); } 
+      else { listPage.classList.add('hidden'); writePage.classList.remove('hidden'); window.scrollTo(0, 0); }
     }
 
     function openWritePage() {
@@ -519,10 +486,7 @@
       const noData = document.getElementById('no-data');
       grid.innerHTML = '';
 
-      if (data.length === 0) {
-        noData.classList.remove('hidden');
-        return;
-      }
+      if (data.length === 0) { noData.classList.remove('hidden'); return; }
       noData.classList.add('hidden');
 
       data.forEach((item, index) => {
@@ -530,21 +494,21 @@
         const thumb = images.length > 0 ? images[0] : 'https://via.placeholder.com/400x300?text=No+Image';
         const pfBadge = item.PortfolioLink ? `<span class="absolute top-3 right-3 bg-emerald-500/90 backdrop-blur text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm"><i class="fa-solid fa-check"></i> 포트폴리오</span>` : '';
         const delay = index * 50; 
-        let displayPrice = item.Price;
         
         const card = document.createElement('div');
         card.className = "group bg-white rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden border border-slate-200 flex flex-col h-full";
         card.style.animation = `fadeInUp 0.6s ease-out ${delay}ms both`;
         card.onclick = () => openDetail(item.ID);
         
+        // 이미지 로딩 에러 핸들러 추가
+        const imgTag = `<img src="${thumb}" onerror="this.src='https://via.placeholder.com/400x300?text=Error'" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">`;
+
         card.innerHTML = `
           <div class="aspect-card bg-slate-100 overflow-hidden relative">
-            <img src="${thumb}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+            ${imgTag}
             <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="absolute top-3 left-3">
-              <span class="text-[10px] font-bold text-slate-700 bg-white/95 backdrop-blur-sm px-2 py-1 rounded-md shadow-sm border border-slate-100">
-                ${item.Country}
-              </span>
+              <span class="text-[10px] font-bold text-slate-700 bg-white/95 backdrop-blur-sm px-2 py-1 rounded-md shadow-sm border border-slate-100">${item.Country}</span>
             </div>
             ${pfBadge}
           </div>
@@ -556,7 +520,7 @@
             <h3 class="font-bold text-slate-800 line-clamp-1 group-hover:text-primary transition-colors mb-1">${item.Title}</h3>
             <p class="text-xs text-slate-500 line-clamp-2 mb-3">${item.Content}</p>
             <div class="mt-auto pt-3 border-t border-slate-50 flex justify-between items-center">
-              <span class="font-bold text-slate-800">${displayPrice}</span>
+              <span class="font-bold text-slate-800">${item.Price}</span>
               <span class="text-[10px] text-slate-400">경력 ${item.Experience || '-'}</span>
             </div>
           </div>
@@ -569,19 +533,15 @@
       const country = document.getElementById('filter-country').value;
       const category = document.getElementById('filter-category').value;
       const keyword = document.getElementById('filter-keyword').value.toLowerCase();
-
       const filtered = allData.filter(item => {
         const mCountry = country === "" || item.Country === country;
         const mCategory = category === "" || item.CategoryMain === category;
-        const mKeyword = keyword === "" || 
-                         item.Title.toLowerCase().includes(keyword) || 
-                         item.Content.toLowerCase().includes(keyword);
+        const mKeyword = keyword === "" || item.Title.toLowerCase().includes(keyword) || item.Content.toLowerCase().includes(keyword);
         return mCountry && mCategory && mKeyword;
       });
       renderCards(filtered);
     }
 
-    // --- Detail Modal ---
     function openDetail(id) {
       const item = allData.find(d => d.ID.toString() === id.toString());
       if (!item) return;
@@ -593,9 +553,13 @@
       document.getElementById('detail-price').innerText = item.Price;
       document.getElementById('detail-exp').innerText = `경력: ${item.Experience || '미기재'}`;
       
-      // 날짜 오류 수정
-      const dateStr = item.EndDate ? new Date(item.EndDate).toLocaleDateString() : '날짜 미정';
-      document.getElementById('detail-enddate').innerText = `~${dateStr} 종료`;
+      // 날짜 파싱 오류 해결 (유효성 검사)
+      let endDateStr = '날짜 미정';
+      if(item.EndDate) {
+          const d = new Date(item.EndDate);
+          if(!isNaN(d.getTime())) endDateStr = d.toLocaleDateString();
+      }
+      document.getElementById('detail-enddate').innerText = `~${endDateStr} 종료`;
       
       document.getElementById('detail-content').innerText = item.Content;
       document.getElementById('detail-date').innerText = `등록일: ${new Date(item.Timestamp).toLocaleDateString()}`;
@@ -609,6 +573,8 @@
         images.forEach(src => {
           const img = document.createElement('img');
           img.src = src;
+          // 이미지 로드 실패 시 처리
+          img.onerror = function() { this.src='https://via.placeholder.com/600x400?text=Image+Load+Error'; };
           img.className = "snap-center w-full h-full object-contain bg-black/5";
           imgContainer.appendChild(img);
         });
@@ -617,17 +583,16 @@
       const btnContainer = document.getElementById('contact-buttons-container');
       btnContainer.innerHTML = '';
 
-      // 1. 포트폴리오 버튼 (가시성 개선)
+      // [수정] 포트폴리오 버튼을 하단에 크게 배치
       if(item.PortfolioLink) {
         const pfBtn = document.createElement('a');
         pfBtn.href = item.PortfolioLink;
         pfBtn.target = "_blank";
-        pfBtn.className = "w-full bg-violet-600 hover:bg-violet-700 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-violet-200 transition-all flex items-center justify-center gap-2 mb-2";
+        pfBtn.className = "w-full bg-violet-600 hover:bg-violet-700 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-violet-200 transition-all flex items-center justify-center gap-2 mb-3";
         pfBtn.innerHTML = `<i class="fa-solid fa-link"></i> 포트폴리오 보기`;
         btnContainer.appendChild(pfBtn);
       }
 
-      // 2. 연락처 버튼 (3개 이상 렌더링 지원)
       let contacts = [];
       try {
           if (item.ContactType === 'multi') {
@@ -646,9 +611,7 @@
           if (contact.type === 'kakao') {
               btn.classList.add("bg-[#FEE500]", "hover:bg-[#FDD835]", "text-slate-900", "shadow-yellow-200");
               btn.innerHTML = `<i class="fa-solid fa-comment"></i> 카카오톡 ID 복사 (${contact.value})`;
-              btn.onclick = () => {
-                  navigator.clipboard.writeText(contact.value).then(() => alert('카카오톡 ID가 복사되었습니다.'));
-              };
+              btn.onclick = () => { navigator.clipboard.writeText(contact.value).then(() => alert('카카오톡 ID가 복사되었습니다.')); };
           } else if (contact.type === 'openchat') {
               btn.classList.add("bg-slate-800", "hover:bg-slate-900", "text-white");
               btn.innerHTML = `<i class="fa-solid fa-arrow-up-right-from-square"></i> 오픈채팅 입장`;
@@ -666,10 +629,7 @@
       const panel = modal.querySelector('.modal-panel');
       
       modal.classList.remove('hidden');
-      setTimeout(() => { 
-        bg.classList.remove('opacity-0'); 
-        panel.classList.remove('opacity-0', 'scale-95'); 
-      }, 10);
+      setTimeout(() => { bg.classList.remove('opacity-0'); panel.classList.remove('opacity-0', 'scale-95'); }, 10);
     }
 
     function closeModal(id) {
@@ -685,54 +645,29 @@
       }
     }
 
-    function openDeleteModal() {
-      document.getElementById('delete-password').value = '';
-      document.getElementById('password-modal').classList.remove('hidden');
-    }
+    function openDeleteModal() { document.getElementById('delete-password').value = ''; document.getElementById('password-modal').classList.remove('hidden'); }
 
     async function executeDelete() {
       const pwd = document.getElementById('delete-password').value;
       if(!pwd) { alert('비밀번호를 입력하세요'); return; }
-
       const btn = document.querySelector('#password-modal button.bg-red-500');
       const originalText = btn.textContent;
-      btn.textContent = '처리중...';
-      btn.disabled = true;
-
+      btn.textContent = '처리중...'; btn.disabled = true;
       try {
-        const payload = {
-          action: 'delete',
-          id: currentDetailId,
-          password: btoa(pwd)
-        };
+        const payload = { action: 'delete', id: currentDetailId, password: btoa(pwd) };
         const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
         const json = await res.json();
-        btn.textContent = originalText;
-        btn.disabled = false;
-        if(json.success) {
-          alert("삭제되었습니다.");
-          closeModal('password-modal');
-          closeModal('detail-modal');
-          fetchData();
-        } else {
-          alert("삭제 실패: " + json.message);
-        }
-      } catch (err) {
-        alert("통신 오류: " + err);
-        btn.textContent = originalText;
-        btn.disabled = false;
-      }
+        btn.textContent = originalText; btn.disabled = false;
+        if(json.success) { alert("삭제되었습니다."); closeModal('password-modal'); closeModal('detail-modal'); fetchData(); } 
+        else { alert("삭제 실패: " + json.message); }
+      } catch (err) { alert("통신 오류: " + err); btn.textContent = originalText; btn.disabled = false; }
     }
 
     function handleImagePreview(input) {
       const container = document.getElementById('preview-container');
       container.innerHTML = '';
       selectedImages = [];
-      if (input.files.length > 3) {
-        alert('최대 3장까지만 업로드 가능합니다.');
-        input.value = '';
-        return;
-      }
+      if (input.files.length > 3) { alert('최대 3장까지만 업로드 가능합니다.'); input.value = ''; return; }
       Array.from(input.files).forEach(file => {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -742,17 +677,10 @@
             const ctx = canvas.getContext('2d');
             const maxW = 800;
             const scale = maxW < img.width ? maxW / img.width : 1;
-            canvas.width = img.width * scale;
-            canvas.height = img.height * scale;
+            canvas.width = img.width * scale; canvas.height = img.height * scale;
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-            
-            selectedImages.push({
-               fileName: file.name,
-               mimeType: 'image/jpeg',
-               data: dataUrl.split(',')[1]
-            });
-
+            selectedImages.push({ fileName: file.name, mimeType: 'image/jpeg', data: dataUrl.split(',')[1] });
             const thumb = document.createElement('div');
             thumb.className = "relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border border-slate-300 shadow-sm";
             thumb.innerHTML = `<img src="${dataUrl}" class="w-full h-full object-cover">`;
@@ -766,20 +694,18 @@
 
     async function handleFormSubmit(e) {
       e.preventDefault();
-      if (contactList.length === 0) {
-          alert("최소 한 개의 연락처를 추가해주세요.");
-          return;
-      }
-
+      if (contactList.length === 0) { alert("최소 한 개의 연락처를 추가해주세요."); return; }
       const btn = document.getElementById('submit-btn');
       const originalText = btn.textContent;
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 처리 중...';
+      btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 처리 중...';
 
       const pwd = document.getElementById('inputPassword').value;
       const rawPrice = document.getElementById('inputPrice').value;
       const currency = document.getElementById('currency-prefix').innerText;
       const formattedPrice = `${currency} ${Number(rawPrice).toLocaleString()}`;
+      
+      // 날짜 값 안전하게 가져오기
+      const endDateVal = document.getElementById('inputEndDate').value;
 
       const formObj = {
         country: document.getElementById('inputCountry').value,
@@ -793,51 +719,23 @@
         contactValue: JSON.stringify(contactList), 
         experience: document.getElementById('inputExperience').value,
         portfolioLink: document.getElementById('inputPortfolio').value,
-        endDate: document.getElementById('inputEndDate').value,
+        endDate: endDateVal, // 문자열 그대로 전송
         password: btoa(pwd) 
       };
 
-      const payload = {
-        action: 'save',
-        data: formObj,
-        files: selectedImages
-      };
+      const payload = { action: 'save', data: formObj, files: selectedImages };
 
       try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify(payload)
-        });
+        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
         const json = await res.json();
-        btn.disabled = false;
-        btn.textContent = originalText;
-        if(json.success) {
-          alert('성공적으로 등록되었습니다!');
-          showPage('list');
-          fetchData();
-        } else {
-          alert('등록 실패: ' + json.message);
-        }
-      } catch (err) {
-        btn.disabled = false;
-        btn.textContent = originalText;
-        alert('서버 통신 오류: ' + err);
-      }
+        btn.disabled = false; btn.textContent = originalText;
+        if(json.success) { alert('성공적으로 등록되었습니다!'); showPage('list'); fetchData(); } 
+        else { alert('등록 실패: ' + json.message); }
+      } catch (err) { btn.disabled = false; btn.textContent = originalText; alert('서버 통신 오류: ' + err); }
     }
 
-    const subCategories = { 
-      '생활/정착': ['통번역', '이사/운송', '법률상담', '부동산', '중고거래'], 
-      '투어/가이드': ['공항픽업', '현지투어', '숙박알선', '스냅촬영'], 
-      '교육/레슨': ['어학', '악기', '입시/과외', '운동/PT'], 
-      '비즈니스': ['마케팅', '디자인', '개발', '세무회계'], 
-      '심부름': ['구매대행', '청소', '돌봄', '기타'] 
-    };
-    function updateSubCategory() { 
-      const m = document.getElementById('inputCategoryMain').value; 
-      const s = document.getElementById('inputCategorySub'); 
-      s.innerHTML='<option value="" disabled selected>선택해주세요</option>'; 
-      if(subCategories[m]) subCategories[m].forEach(sub=>s.insertAdjacentHTML('beforeend',`<option value="${sub}">${sub}</option>`)); 
-    }
+    const subCategories = { '생활/정착': ['통번역', '이사/운송', '법률상담', '부동산', '중고거래'], '투어/가이드': ['공항픽업', '현지투어', '숙박알선', '스냅촬영'], '교육/레슨': ['어학', '악기', '입시/과외', '운동/PT'], '비즈니스': ['마케팅', '디자인', '개발', '세무회계'], '심부름': ['구매대행', '청소', '돌봄', '기타'] };
+    function updateSubCategory() { const m = document.getElementById('inputCategoryMain').value; const s = document.getElementById('inputCategorySub'); s.innerHTML='<option value="" disabled selected>선택해주세요</option>'; if(subCategories[m]) subCategories[m].forEach(sub=>s.insertAdjacentHTML('beforeend',`<option value="${sub}">${sub}</option>`)); }
     
     const styleSheet = document.createElement("style");
     styleSheet.innerText = `@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`;
